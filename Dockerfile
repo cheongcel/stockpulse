@@ -3,7 +3,7 @@ WORKDIR /app
 COPY . .
 RUN gradle build -x test
 
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/build/libs/stockpulse-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
