@@ -194,6 +194,15 @@
             color: #aaa;
             margin-top: 4px;
         }
+        .news-link {
+            font-size: 11px;
+            color: #378ADD;
+            text-decoration: none;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .news-link:hover { color: #185FA5; }
+    </style>
     </style>
 </head>
 <body>
@@ -213,9 +222,10 @@
 
     <p class="section-label">최신 뉴스</p>
     <div class="news-list">
-        <div class="news-row" th:each="title, stat : ${titles}">
+        <div class="news-row" th:each="news, stat : ${newsList}">
             <span class="news-index" th:text="${stat.index + 1}">1</span>
-            <span class="news-text" th:text="${title}"></span>
+            <span class="news-text" th:text="${news['title']}"></span>
+            <a class="news-link" th:href="${news['link']}" target="_blank">↗</a>
         </div>
     </div>
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,10 +36,10 @@ public class StockController {
 
     @GetMapping("/analyze/{keyword}")
     public String analyze(@PathVariable String keyword, Model model) {
-        List<String> titles = newsService.fetchNewsTitles(keyword);
+        List<Map<String, String>> newsList = newsService.fetchNews(keyword);
+        List<String> titles = newsService.extractTitles(newsList);
         String aiResult = aiService.analyzeNews(keyword, titles);
 
-        // JSON 파싱
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper =
                     new com.fasterxml.jackson.databind.ObjectMapper();
@@ -58,7 +59,7 @@ public class StockController {
         }
 
         model.addAttribute("keyword", keyword);
-        model.addAttribute("titles", titles);
+        model.addAttribute("newsList", newsList);
         return "result";
     }
 }

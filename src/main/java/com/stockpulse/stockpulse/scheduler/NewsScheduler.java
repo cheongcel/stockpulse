@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -27,9 +28,10 @@ public class NewsScheduler {
         List<Stock> stocks = stockRepository.findAll();
 
         for (Stock stock : stocks) {
-            List<String> titles = newsService.fetchNewsTitles(stock.getKeyword());
-            if (titles.isEmpty()) continue;
+            List<Map<String, String>> newsList = newsService.fetchNews(stock.getKeyword());
+            if (newsList.isEmpty()) continue;
 
+            List<String> titles = newsService.extractTitles(newsList);
             String aiResult = aiService.analyzeNews(stock.getKeyword(), titles);
             emailService.sendNewsDigest(
                     stock.getEmail(),
