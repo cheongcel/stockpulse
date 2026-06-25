@@ -22,7 +22,7 @@ public class NewsScheduler {
     private final AiService aiService;
     private final EmailService emailService;
 
-    @Scheduled(cron = "0 0 7 * * *")
+    @Scheduled(fixedDelay = 60000)//@Scheduled(cron = "0 0 7 * * *")
     public void sendDailyNewsDigest() {
         log.info("뉴스 다이제스트 스케줄러 시작");
         List<Stock> stocks = stockRepository.findAll();
