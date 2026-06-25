@@ -15,17 +15,13 @@ public class Stock {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String ticker; // AAPL, 005930 등
+    private String keyword;
 
     @Column(nullable = false)
-    private String companyName;
+    private String email;
 
-    @Column(nullable = false)
-    private String email; // 구독자 이메일
-
-    public Stock(String ticker, String companyName, String email) {
-        this.ticker = ticker;
-        this.companyName = companyName;
+    public Stock(String keyword, String email) {
+        this.keyword = keyword;
         this.email = email;
     }
 }

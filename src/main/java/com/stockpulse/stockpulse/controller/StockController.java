@@ -25,22 +25,40 @@ public class StockController {
     }
 
     @PostMapping("/subscribe")
-    public String subscribe(@RequestParam String ticker,
-                            @RequestParam String companyName,
+    public String subscribe(@RequestParam String keyword,
                             @RequestParam String email) {
-        if (!stockRepository.existsByTicker(ticker)) {
-            stockRepository.save(new Stock(ticker, companyName, email));
+        if (!stockRepository.existsByKeyword(keyword)) {
+            stockRepository.save(new Stock(keyword, email));
         }
         return "redirect:/";
     }
 
-    @GetMapping("/analyze/{ticker}")
-    public String analyze(@PathVariable String ticker, Model model) {
-        List<String> titles = newsService.fetchNewsTitles(ticker);
-        String aiResult = aiService.analyzeNews(ticker, titles);
-        model.addAttribute("ticker", ticker);
+    @GetMapping("/analyze/{keyword}")
+    public String analyze(@PathVariable String keyword, Model model) {
+        List<String> titles = newsService.fetchNewsTitles(keyword);
+        String aiResult = aiService.analyzeNews(keyword, titles);
+
+        // JSON 파싱
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode node =
+                    mapper.readTree(aiResult);
+
+            model.addAttribute("summary",
+                    node.has("summary") ? node.get("summary").asText() : "요약 없음");
+            model.addAttribute("sentiment",
+                    node.has("sentiment") ? node.get("sentiment").asText() : "NEUTRAL");
+            model.addAttribute("score",
+                    node.has("score") ? node.get("score").asDouble() : 0.5);
+        } catch (Exception e) {
+            model.addAttribute("summary", "분석 중 오류가 발생했어요. 다시 시도해주세요.");
+            model.addAttribute("sentiment", "NEUTRAL");
+            model.addAttribute("score", 0.5);
+        }
+
+        model.addAttribute("keyword", keyword);
         model.addAttribute("titles", titles);
-        model.addAttribute("aiResult", aiResult);
         return "result";
     }
 }

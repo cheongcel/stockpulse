@@ -14,35 +14,45 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NewsService {
 
-    @Value("${news.api.key}")
-    private String newsApiKey;
+    @Value("${naver.api.client-id}")
+    private String clientId;
 
-    private final WebClient webClient = WebClient.create("https://newsapi.org");
+    @Value("${naver.api.client-secret}")
+    private String clientSecret;
 
-    public List<String> fetchNewsTitles(String ticker) {
+    private final WebClient webClient = WebClient.create("https://openapi.naver.com");
+
+    public List<String> fetchNewsTitles(String keyword) {
         try {
             JsonNode response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/v2/everything")
-                            .queryParam("q", ticker)
-                            .queryParam("language", "en")
-                            .queryParam("sortBy", "publishedAt")
-                            .queryParam("pageSize", "5")
-                            .queryParam("apiKey", newsApiKey)
+                            .path("/v1/search/news.json")
+                            .queryParam("query", keyword)
+                            .queryParam("display", 5)
+                            .queryParam("sort", "date")
                             .build())
+                    .header("X-Naver-Client-Id", clientId)
+                    .header("X-Naver-Client-Secret", clientSecret)
                     .retrieve()
                     .bodyToMono(JsonNode.class)
                     .block();
 
             List<String> titles = new ArrayList<>();
-            if (response != null && response.has("articles")) {
-                for (JsonNode article : response.get("articles")) {
-                    titles.add(article.get("title").asText());
+            if (response != null && response.has("items")) {
+                for (JsonNode item : response.get("items")) {
+                    // HTML 태그 제거
+                    String title = item.get("title").asText()
+                            .replaceAll("<[^>]*>", "")
+                            .replaceAll("&amp;", "&")
+                            .replaceAll("&quot;", "\"")
+                            .replaceAll("&#039;", "'");
+                    titles.add(title);
                 }
             }
             return titles;
+
         } catch (Exception e) {
-            log.error("뉴스 수집 실패: {}", e.getMessage());
+            log.error("네이버 뉴스 수집 실패: {}", e.getMessage());
             return List.of();
         }
     }

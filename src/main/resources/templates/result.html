@@ -4,26 +4,292 @@
     <meta charset="UTF-8">
     <title>StockPulse - 분석 결과</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
-        h1 { color: #2563EB; }
-        .result-box { background: #F0F4FF; padding: 20px; border-radius: 8px; margin: 10px 0; }
-        .news-item { border-left: 3px solid #2563EB; padding-left: 10px; margin: 8px 0; }
-        a { color: #2563EB; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #fff; }
+
+        .ticker-wrap {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+            background: #0a0a0a;
+            padding: 13px 0;
+        }
+        .ticker-track {
+            display: flex;
+            white-space: nowrap;
+            width: max-content;
+            animation: ticker 35s linear infinite;
+        }
+        .ticker-item {
+            font-size: 13px;
+            color: #e0e0e0;
+            padding: 0 40px;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+        .ticker-sep { color: #444; padding: 0; flex-shrink: 0; }
+        @keyframes ticker {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 3rem 2.5rem 3rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #aaa;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            margin-bottom: 2rem;
+        }
+        .back-link:hover { color: #378ADD; }
+
+        .wordmark {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .wordmark-pulse {
+            width: 11px; height: 11px; border-radius: 50%;
+            background: #378ADD;
+            animation: blink 1.8s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.35; transform: scale(0.6); }
+        }
+        .wordmark h1 {
+            font-size: 48px;
+            font-weight: 500;
+            color: #111;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .wordmark h1 .keyword-text { color: #378ADD; }
+
+        .subtitle {
+            font-size: 12px;
+            color: #aaa;
+            margin-left: 23px;
+            margin-bottom: 2.5rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 0.5px solid #e5e5e5;
+            margin: 2.2rem 0;
+        }
+
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .news-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 0.5px solid #e5e5e5;
+            padding: 10px 14px;
+        }
+        .news-index {
+            font-size: 10px;
+            color: #ccc;
+            font-weight: 500;
+            width: 16px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .news-text {
+            font-size: 12px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .ai-box {
+            border: 0.5px solid #e5e5e5;
+            border-left: 2px solid #0a0a0a;
+            padding: 0;
+            background: #fafafa;
+        }
+        .ai-row { padding: 16px 20px; }
+        .ai-row-inline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ai-divider { border-top: 0.5px solid #e5e5e5; }
+        .ai-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #aaa;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .ai-row-inline .ai-label { margin-bottom: 0; }
+        .ai-summary {
+            font-size: 13px;
+            color: #222;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+        .sentiment-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 2px;
+        }
+        .sentiment-badge.positive { background: #e8f5e9; color: #2e7d32; }
+        .sentiment-badge.negative { background: #fce4ec; color: #c62828; }
+        .sentiment-badge.neutral  { background: #f5f5f5; color: #666; }
+        .score-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .score-bar {
+            width: 200px;
+            height: 4px;
+            background: #e5e5e5;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .score-fill {
+            height: 100%;
+            background: #378ADD;
+            border-radius: 2px;
+        }
+        .score-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #378ADD;
+        }
+        .score-desc {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
-<h1>📊 <span th:text="${ticker}"></span> AI 분석 결과</h1>
 
-<h2>최신 뉴스</h2>
-<div th:each="title : ${titles}">
-    <div class="news-item" th:text="${title}"></div>
+<div class="ticker-wrap">
+    <div class="ticker-track" id="top-track"></div>
 </div>
 
-<h2>AI 분석</h2>
-<div class="result-box">
-    <pre th:text="${aiResult}"></pre>
+<div class="main">
+    <a class="back-link" href="/">← 돌아가기</a>
+
+    <div class="wordmark">
+        <div class="wordmark-pulse"></div>
+        <h1><span class="keyword-text" th:text="${keyword}">키워드</span></h1>
+    </div>
+    <p class="subtitle">AI 분석 결과</p>
+
+    <p class="section-label">최신 뉴스</p>
+    <div class="news-list">
+        <div class="news-row" th:each="title, stat : ${titles}">
+            <span class="news-index" th:text="${stat.index + 1}">1</span>
+            <span class="news-text" th:text="${title}"></span>
+        </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <p class="section-label">AI 분석</p>
+    <div class="ai-box">
+
+        <div class="ai-row">
+            <span class="ai-label"> 요약</span>
+            <p class="ai-summary" th:text="${summary}"></p>
+        </div>
+
+        <div class="ai-divider"></div>
+
+        <div class="ai-row ai-row-inline">
+            <span class="ai-label"> 감성</span>
+            <span class="sentiment-badge"
+                  th:classappend="${sentiment == 'POSITIVE'} ? 'positive' : (${sentiment == 'NEGATIVE'} ? 'negative' : 'neutral')"
+                  th:text="${sentiment == 'POSITIVE'} ? '🟢 긍정적' : (${sentiment == 'NEGATIVE'} ? '🔴 부정적' : '🟡 중립')">
+            </span>
+        </div>
+
+        <div class="ai-divider"></div>
+
+        <div class="ai-row">
+            <span class="ai-label"> 뉴스 감성 점수</span>
+            <div class="score-bar-wrap">
+                <div class="score-bar">
+                    <div class="score-fill"
+                         th:style="'width:' + ${score * 100} + '%'"></div>
+                </div>
+                <span class="score-text"
+                      th:text="${#numbers.formatDecimal(score * 100, 1, 0)} + '%'"></span>
+            </div>
+            <p class="score-desc">뉴스 톤이 얼마나 긍정적인지를 나타내요. 투자 추천이 아니에요.</p>
+        </div>
+
+    </div>
 </div>
 
-<a href="/">← 돌아가기</a>
+<div class="ticker-wrap">
+    <div class="ticker-track" id="bottom-track"></div>
+</div>
+
+<script>
+    const TOP = [
+        "StockPulse — AI 기반 뉴스 감성 분석 서비스",
+        "관심 키워드를 등록하면 매일 아침 AI 요약을 보내드려요",
+        "삼성전자 · 비트코인 · 금리 · 환율 — 키워드 무제한 등록",
+        "뉴스 흐름을 AI가 먼저 읽고 감성 점수로 알려드려요",
+        "오늘의 시장 코멘트: Fed 발언 앞두고 관망세 지속",
+        "글로벌 ETF 분석 리포트 — 주간 무료 발송 신청",
+        "환율·금리·원자재 — 매크로 지표 요약도 함께 받아보세요",
+    ];
+    const BOT = [
+        "실시간 공시 알림 — DART 연동 베타 서비스 오픈",
+        "이메일 말고 슬랙으로도 받아보세요 — Slack 연동 지원",
+        "미국·한국·일본 3개국 주요 뉴스 커버리지",
+        "AI 요약 리포트 예시 보기 — 지금 무료 체험 신청",
+        "주간 포트폴리오 성과 요약 — 매주 월요일 발송",
+        "키워드 알림 커스텟 설정 — 원하는 조건만 골라 받기",
+        "네이버 뉴스 기반 실시간 키워드 분석 서비스",
+    ];
+
+    function build(items) {
+        const pool = [...items, ...items, ...items, ...items, ...items, ...items];
+        return pool.map(t =>
+            `<span class="ticker-item">${t}</span><span class="ticker-sep">—</span>`
+        ).join('');
+    }
+
+    document.getElementById('top-track').innerHTML = build(TOP);
+    document.getElementById('bottom-track').innerHTML = build(BOT);
+</script>
 </body>
 </html>

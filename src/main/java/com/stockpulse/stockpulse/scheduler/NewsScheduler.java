@@ -21,20 +21,19 @@ public class NewsScheduler {
     private final AiService aiService;
     private final EmailService emailService;
 
-    // 매일 아침 7시 자동 실행
     @Scheduled(cron = "0 0 7 * * *")
     public void sendDailyNewsDigest() {
         log.info("뉴스 다이제스트 스케줄러 시작");
         List<Stock> stocks = stockRepository.findAll();
 
         for (Stock stock : stocks) {
-            List<String> titles = newsService.fetchNewsTitles(stock.getTicker());
+            List<String> titles = newsService.fetchNewsTitles(stock.getKeyword());
             if (titles.isEmpty()) continue;
 
-            String aiResult = aiService.analyzeNews(stock.getTicker(), titles);
+            String aiResult = aiService.analyzeNews(stock.getKeyword(), titles);
             emailService.sendNewsDigest(
                     stock.getEmail(),
-                    stock.getTicker(),
+                    stock.getKeyword(),
                     aiResult,
                     "분석중"
             );
