@@ -239,16 +239,6 @@
             <p class="ai-summary" th:text="${summary}"></p>
         </div>
 
-        <div class="ai-divider"></div>
-
-        <div class="ai-row ai-row-inline">
-            <span class="ai-label"> 여론</span>
-            <span class="sentiment-badge"
-                  th:classappend="${sentiment == 'POSITIVE'} ? 'positive' : (${sentiment == 'NEGATIVE'} ? 'negative' : 'neutral')"
-                  th:text="${sentiment == 'POSITIVE'} ? '🟢 긍정적' : (${sentiment == 'NEGATIVE'} ? '🔴 부정적' : '🟡 중립')">
-            </span>
-        </div>
-
     </div>
 </div>
 

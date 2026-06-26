@@ -1,5 +1,7 @@
 package com.stockpulse.stockpulse.scheduler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stockpulse.stockpulse.domain.Stock;
 import com.stockpulse.stockpulse.repository.StockRepository;
 import com.stockpulse.stockpulse.service.AiService;
@@ -22,7 +24,7 @@ public class NewsScheduler {
     private final AiService aiService;
     private final EmailService emailService;
 
-    @Scheduled(fixedDelay = 60000)//@Scheduled(cron = "0 0 7 * * *")
+    @Scheduled(cron = "0 0 7 * * *")
     public void sendDailyNewsDigest() {
         log.info("뉴스 다이제스트 스케줄러 시작");
         List<Stock> stocks = stockRepository.findAll();
@@ -33,10 +35,22 @@ public class NewsScheduler {
 
             List<String> titles = newsService.extractTitles(newsList);
             String aiResult = aiService.analyzeNews(stock.getKeyword(), titles);
+
+            String summary;
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(aiResult);
+                summary = node.has("summary") ?
+                        node.get("summary").asText() : "요약을 가져올 수 없어요.";
+            } catch (Exception e) {
+                log.warn("AI 결과 파싱 실패: {}", e.getMessage());
+                summary = "요약을 가져올 수 없어요.";
+            }
+
             emailService.sendNewsDigest(
                     stock.getEmail(),
                     stock.getKeyword(),
-                    aiResult,
+                    summary,
                     "분석중"
             );
         }
