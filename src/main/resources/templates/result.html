@@ -242,26 +242,11 @@
         <div class="ai-divider"></div>
 
         <div class="ai-row ai-row-inline">
-            <span class="ai-label"> 감성</span>
+            <span class="ai-label"> 여론</span>
             <span class="sentiment-badge"
                   th:classappend="${sentiment == 'POSITIVE'} ? 'positive' : (${sentiment == 'NEGATIVE'} ? 'negative' : 'neutral')"
                   th:text="${sentiment == 'POSITIVE'} ? '🟢 긍정적' : (${sentiment == 'NEGATIVE'} ? '🔴 부정적' : '🟡 중립')">
             </span>
-        </div>
-
-        <div class="ai-divider"></div>
-
-        <div class="ai-row">
-            <span class="ai-label"> 뉴스 감성 점수</span>
-            <div class="score-bar-wrap">
-                <div class="score-bar">
-                    <div class="score-fill"
-                         th:style="'width:' + ${score * 100} + '%'"></div>
-                </div>
-                <span class="score-text"
-                      th:text="${#numbers.formatDecimal(score * 100, 1, 0)} + '%'"></span>
-            </div>
-            <p class="score-desc">뉴스 톤이 얼마나 긍정적인지를 나타내요. 투자 추천이 아니에요.</p>
         </div>
 
     </div>
