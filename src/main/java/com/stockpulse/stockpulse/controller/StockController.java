@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +28,15 @@ public class StockController {
 
     @PostMapping("/subscribe")
     public String subscribe(@RequestParam String keyword,
-                            @RequestParam String email) {
+                            @RequestParam String email,
+                            RedirectAttributes redirectAttributes) {
         if (!stockRepository.existsByKeyword(keyword)) {
             stockRepository.save(new Stock(keyword, email));
+            redirectAttributes.addFlashAttribute("successMsg",
+                    keyword + " 키워드 구독이 완료됐어요!");
+        } else {
+            redirectAttributes.addFlashAttribute("successMsg",
+                    "이미 구독 중인 키워드예요.");
         }
         return "redirect:/";
     }

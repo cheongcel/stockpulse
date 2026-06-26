@@ -157,6 +157,15 @@
             gap: 6px;
         }
         .stock-link:hover { color: #185FA5; }
+        .success-msg {
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-size: 12px;
+            padding: 10px 14px;
+            margin-bottom: 1.5rem;
+            border-left: 2px solid #2e7d32;
+        }
+
 
         /* ── 로딩 오버레이 ── */
         .loading-overlay {
@@ -208,6 +217,7 @@
         <h1>Stock<span>Pulse</span></h1>
     </div>
     <p class="tagline">AI가 매일 아침 관심 키워드 뉴스를 분석해서 이메일로 보내드려요</p>
+    <div class="success-msg" th:if="${successMsg}" th:text="${successMsg}"></div>
 
     <p class="section-label">키워드 구독</p>
     <form th:action="@{/subscribe}" method="post">
