@@ -31,7 +31,7 @@ public class EmailService {
 
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(toEmail);
-            message.setSubject("[StockPulse] " + keyword + " 오늘의 뉴스 요약");
+            message.setSubject("[StockPulse] " + " 오늘의 뉴스 요약");
             message.setText(
                     "안녕하세요! StockPulse 뉴스 다이제스트입니다.\n\n" +
                             " 키워드: " + keyword + "\n\n" +
