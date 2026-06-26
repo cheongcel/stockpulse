@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -17,7 +18,22 @@ public class AiService {
 
     private final WebClient webClient = WebClient.create("https://generativelanguage.googleapis.com");
 
+    // 로컬 캐시: 키워드 → (분석결과, 저장시간)
+    private final Map<String, long[]> cacheTimes = new ConcurrentHashMap<>();
+    private final Map<String, String> cacheResults = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL = 1000 * 60 * 30; // 30분
+
     public String analyzeNews(String ticker, List<String> titles) {
+
+        // 캐시 확인
+        if (cacheResults.containsKey(ticker)) {
+            long savedTime = cacheTimes.get(ticker)[0];
+            if (System.currentTimeMillis() - savedTime < CACHE_TTL) {
+                log.info("캐시 히트: {}", ticker);
+                return cacheResults.get(ticker);
+            }
+        }
+
         String prompt = String.format(
                 "다음은 '%s' 관련 최신 뉴스 제목 %d개입니다:\n%s\n\n" +
                         "위 뉴스들을 바탕으로 현재 여론과 시장 분위기를 분석해주세요.\n" +
@@ -56,6 +72,12 @@ public class AiService {
                             .get("content").get("parts").get(0)
                             .get("text").asText();
                     text = text.replaceAll("```json", "").replaceAll("```", "").trim();
+
+                    // 캐시 저장
+                    cacheResults.put(ticker, text);
+                    cacheTimes.put(ticker, new long[]{System.currentTimeMillis()});
+                    log.info("캐시 저장: {}", ticker);
+
                     return text;
                 }
 
