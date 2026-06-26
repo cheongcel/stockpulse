@@ -157,15 +157,43 @@
             gap: 6px;
         }
         .stock-link:hover { color: #185FA5; }
-        .success-msg {
-            background: #e8f5e9;
-            color: #2e7d32;
-            font-size: 12px;
-            padding: 10px 14px;
-            margin-bottom: 1.5rem;
-            border-left: 2px solid #2e7d32;
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .delete-btn:hover { color: #e53935; }
+
+        .stock-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
+        /* ── 토스트 메시지 ── */
+        .toast {
+            display: none;
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0a0a0a;
+            color: #fff;
+            font-size: 12px;
+            padding: 10px 20px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .toast.show {
+            display: block;
+            opacity: 1;
+        }
 
         /* ── 로딩 오버레이 ── */
         .loading-overlay {
@@ -173,7 +201,7 @@
             position: fixed;
             inset: 0;
             background: rgba(255,255,255,0.85);
-            z-index: 999;
+            z-index: 998;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -201,6 +229,9 @@
 </head>
 <body>
 
+<!-- 토스트 메시지 -->
+<div class="toast" id="toast"></div>
+
 <!-- 로딩 오버레이 -->
 <div class="loading-overlay" id="loading-overlay">
     <div class="spinner"></div>
@@ -217,7 +248,9 @@
         <h1>Stock<span>Pulse</span></h1>
     </div>
     <p class="tagline">AI가 매일 아침 관심 키워드 뉴스를 분석해서 이메일로 보내드려요</p>
-    <div class="success-msg" th:if="${successMsg}" th:text="${successMsg}"></div>
+
+    <!-- Thymeleaf 메시지 → JS 토스트로 전달 -->
+    <span id="server-msg" th:text="${successMsg}" style="display:none"></span>
 
     <p class="section-label">키워드 구독</p>
     <form th:action="@{/subscribe}" method="post">
@@ -238,11 +271,16 @@
             <div class="stock-left">
                 <span class="stock-badge" th:text="${stock.keyword}"></span>
             </div>
-            <a class="stock-link"
-               th:href="@{/analyze/{k}(k=${stock.keyword})}"
-               onclick="showLoading()">
-                AI 분석 보기 →
-            </a>
+            <div class="stock-right">
+                <a class="stock-link"
+                   th:href="@{/analyze/{k}(k=${stock.keyword})}"
+                   onclick="showLoading()">AI 분석 보기 →</a>
+                <form th:action="@{/unsubscribe/{k}(k=${stock.keyword})}"
+                      method="post" style="display:inline;">
+                    <button class="delete-btn" type="submit"
+                            onclick="return confirm('구독을 취소할까요?')">✕</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -252,6 +290,18 @@
 </div>
 
 <script>
+    // 토스트 메시지
+    const msg = document.getElementById('server-msg').textContent.trim();
+    if (msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.classList.remove('show'), 300);
+        }, 2500);
+    }
+
     function showLoading() {
         document.getElementById('loading-overlay').classList.add('show');
     }

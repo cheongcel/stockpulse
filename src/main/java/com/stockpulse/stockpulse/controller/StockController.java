@@ -40,6 +40,13 @@ public class StockController {
         }
         return "redirect:/";
     }
+    @PostMapping("/unsubscribe/{keyword}")
+    public String unsubscribe(@PathVariable String keyword,
+                              RedirectAttributes redirectAttributes) {
+        stockRepository.findByKeyword(keyword).ifPresent(stockRepository::delete);
+        redirectAttributes.addFlashAttribute("successMsg", keyword + " 구독이 취소됐어요.");
+        return "redirect:/";
+    }
 
     @GetMapping("/analyze/{keyword}")
     public String analyze(@PathVariable String keyword, Model model) {
