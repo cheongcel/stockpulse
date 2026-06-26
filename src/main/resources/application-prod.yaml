@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://stockpulsedb_8l5y_user:R69stKhxf0rOqZxlf9pha3nWGQY6sZKQ@dpg-d8uic73tqb8s73bajpe0-a:5432.singapore-postgres.render.com:5432/stockpulsedb_8l5y
+    url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
@@ -10,7 +10,7 @@ spring:
       ddl-auto: update
     show-sql: false
   mail:
-    host: smtp.gmail.com.singapore-postgres.render.com
+    host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
