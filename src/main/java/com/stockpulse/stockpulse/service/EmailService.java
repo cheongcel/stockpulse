@@ -36,6 +36,8 @@ public class EmailService {
                     "안녕하세요! StockPulse 뉴스 다이제스트입니다.\n\n" +
                             " 키워드: " + keyword + "\n\n" +
                             " AI 요약:\n" + summary + "\n\n" +
+                            "──────────────────\n" +
+                            "🔗 자세한 분석 보기: https://stockpulse-dcw8.onrender.com\n\n" +
                             "StockPulse 팀 드림"
             );
             mailSender.send(message);
