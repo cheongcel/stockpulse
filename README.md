@@ -7,7 +7,7 @@ A keyword-based news analysis service that automatically collects, summarizes, a
 <br>
 ## 🌐 Live Demo
 
-**🔗 Try it now:** stockpulse.yoossi.dev 
+**🔗 Try it now:** stockpulse.yoossi.dev **
 
 
 > Deployed on Render with PostgreSQL
