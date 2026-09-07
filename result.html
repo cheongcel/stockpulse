@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>StockPulse - 분석 결과</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #fff; }
+
+        .ticker-wrap {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+            background: #0a0a0a;
+            padding: 13px 0;
+        }
+        .ticker-track {
+            display: flex;
+            white-space: nowrap;
+            width: max-content;
+            animation: ticker 35s linear infinite;
+        }
+        .ticker-item {
+            font-size: 13px;
+            color: #e0e0e0;
+            padding: 0 40px;
+            letter-spacing: 0.04em;
+            flex-shrink: 0;
+        }
+        .ticker-sep { color: #444; padding: 0; flex-shrink: 0; }
+        @keyframes ticker {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 3rem 2.5rem 3rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #aaa;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            margin-bottom: 2rem;
+        }
+        .back-link:hover { color: #378ADD; }
+
+        .wordmark {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .wordmark-pulse {
+            width: 11px; height: 11px; border-radius: 50%;
+            background: #378ADD;
+            animation: blink 1.8s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.35; transform: scale(0.6); }
+        }
+        .wordmark h1 {
+            font-size: 48px;
+            font-weight: 500;
+            color: #111;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .wordmark h1 .keyword-text { color: #378ADD; }
+
+        .subtitle {
+            font-size: 12px;
+            color: #aaa;
+            margin-left: 23px;
+            margin-bottom: 2.5rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 0.5px solid #e5e5e5;
+            margin: 2.2rem 0;
+        }
+
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .news-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            border: 0.5px solid #e5e5e5;
+            padding: 10px 14px;
+        }
+        .news-index {
+            font-size: 10px;
+            color: #ccc;
+            font-weight: 500;
+            width: 16px;
+            flex-shrink: 0;
+            text-align: right;
+            margin-top: 1px;
+        }
+        .news-body { flex: 1; min-width: 0; }
+        .news-text {
+            font-size: 12px;
+            color: #333;
+            line-height: 1.5;
+        }
+        .news-summary {
+            font-size: 12px;
+            color: #378ADD;
+            line-height: 1.5;
+            margin-top: 4px;
+        }
+        .news-summary.empty { color: #bbb; }
+        .news-link {
+            font-size: 11px;
+            color: #378ADD;
+            text-decoration: none;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .news-link:hover { color: #185FA5; }
+    </style>
+    </style>
+</head>
+<body>
+
+<div class="ticker-wrap">
+    <div class="ticker-track" id="top-track"></div>
+</div>
+
+<div class="main">
+    <a class="back-link" href="/">← 돌아가기</a>
+
+    <div class="wordmark">
+        <div class="wordmark-pulse"></div>
+        <h1><span class="keyword-text" th:text="${keyword}">키워드</span></h1>
+    </div>
+    <p class="subtitle">AI 분석 결과</p>
+
+    <p class="section-label">최신 뉴스</p>
+    <div class="news-list" th:if="${not #lists.isEmpty(newsList)}">
+        <div class="news-row" th:each="news, stat : ${newsList}">
+            <span class="news-index" th:text="${stat.index + 1}">1</span>
+            <div class="news-body">
+                <span class="news-text" th:text="${news['title']}"></span>
+                <p th:if="${news['summary'] != null}" class="news-summary" th:text="${news['summary']}"></p>
+                <p th:if="${news['summary'] == null}" class="news-summary empty">요약을 가져오지 못했어요. 원문을 확인해주세요.</p>
+            </div>
+            <a class="news-link" th:href="${news['link']}" target="_blank">↗</a>
+        </div>
+    </div>
+    <p th:if="${#lists.isEmpty(newsList)}" style="font-size:12px;color:#aaa;">
+        '<span th:text="${keyword}"></span>' 관련 최신 뉴스를 찾지 못했어요. 잠시 후 다시 시도해주세요.
+    </p>
+</div>
+
+<div class="ticker-wrap">
+    <div class="ticker-track" id="bottom-track"></div>
+</div>
+
+<script>
+    const TOP = [
+        "StockPulse — 키워드 뉴스 구독 · 요약 이메일 서비스",
+        "관심 키워드를 등록하면 매일 아침 뉴스 요약을 보내드려요",
+        "삼성전자 · 비트코인 · 금리 · 환율 — 원하는 키워드 검색",
+    ];
+    const BOT = [
+        "기사별 한 줄 요약 + 원문 링크로 빠르게 확인하세요",
+        "네이버 뉴스 기반 실시간 키워드 검색 서비스",
+    ];
+
+    function build(items) {
+        const pool = [...items, ...items, ...items, ...items, ...items, ...items];
+        return pool.map(t =>
+            `<span class="ticker-item">${t}</span><span class="ticker-sep">—</span>`
+        ).join('');
+    }
+
+    document.getElementById('top-track').innerHTML = build(TOP);
+    document.getElementById('bottom-track').innerHTML = build(BOT);
+</script>
+</body>
+</html>
