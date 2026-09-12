@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>StockPulse</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,8 +99,8 @@
             display: block;
         }
         .form-stack input:focus { border-color: #378ADD; }
-        .input-short { width: 260px; }
-        .input-long  { width: 340px; }
+        .input-short { width: 100%; max-width: 260px; }
+        .input-long  { width: 100%; max-width: 340px; }
 
         .submit-btn {
             margin-top: 4px;
@@ -173,6 +174,44 @@
             color: #888;
             letter-spacing: 0.04em;
         }
+
+        /* ── 모바일 대응 ── */
+        @media (max-width: 600px) {
+            .main { padding: 2rem 1.25rem 2.5rem; }
+
+            h1 { font-size: 38px; letter-spacing: -1.6px; }
+            .wordmark { gap: 9px; }
+            .wordmark-pulse { width: 9px; height: 9px; }
+            .tagline {
+                font-size: 12px;
+                margin-left: 18px;
+                margin-bottom: 2rem;
+            }
+
+            /* 터치하기 쉽도록 입력창·버튼을 키우고 전체 너비로 */
+            .form-stack input {
+                width: 100%;
+                font-size: 16px; /* iOS에서 입력 시 자동 확대되는 것 방지 */
+                padding: 12px 14px;
+            }
+            .btn-row { flex-direction: column; }
+            .submit-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 13px 22px;
+                font-size: 13px;
+            }
+
+            .ticker-item { font-size: 11px; padding: 0 24px; }
+            .ticker-wrap { padding: 10px 0; }
+
+            .toast {
+                left: 16px;
+                right: 16px;
+                transform: none;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -195,7 +234,7 @@
         <div class="wordmark-pulse"></div>
         <h1>Stock<span>Pulse</span></h1>
     </div>
-    <p class="tagline">AI가 매일 아침 관심 키워드 뉴스를 분석해서 이메일로 보내드려요</p>
+    <p class="tagline">관심 키워드의 최신 뉴스를 매일 아침 요약해서 이메일로 보내드려요</p>
 
     <!-- Thymeleaf 메시지 → JS 토스트로 전달 -->
     <span id="server-msg" th:text="${successMsg}" style="display:none"></span>
@@ -208,7 +247,7 @@
             <input class="input-long" type="email" name="email"
                    placeholder="이메일 주소" required/>
         </div>
-        <div style="display:flex; gap:8px; margin-top:4px;">
+        <div class="btn-row" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
             <button type="submit" class="submit-btn">구독하기</button>
             <button type="button" class="submit-btn" style="background:#fff; color:#0a0a0a; border:0.5px solid #ccc;"
                     onclick="goAnalyze()">AI 분석 보기</button>
