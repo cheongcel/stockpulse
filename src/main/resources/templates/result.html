@@ -2,7 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>StockPulse - 분석 결과</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>StockPulse - 키워드 뉴스</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Arial, sans-serif; background: #fff; }
@@ -144,7 +145,26 @@
             margin-left: auto;
         }
         .news-link:hover { color: #185FA5; }
-    </style>
+
+        /* ── 모바일 대응 ── */
+        @media (max-width: 600px) {
+            .main { padding: 2rem 1.25rem 2.5rem; }
+
+            h1 { font-size: 34px; letter-spacing: -1.4px; }
+            .wordmark { gap: 9px; }
+            .wordmark-pulse { width: 9px; height: 9px; }
+            .back-link { margin-bottom: 1.5rem; }
+
+            .news-row {
+                gap: 10px;
+                padding: 12px;
+            }
+            .news-text, .news-summary { font-size: 13px; }
+            .news-index { width: 14px; }
+
+            .ticker-item { font-size: 11px; padding: 0 24px; }
+            .ticker-wrap { padding: 10px 0; }
+        }
     </style>
 </head>
 <body>
