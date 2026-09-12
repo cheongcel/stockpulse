@@ -123,58 +123,6 @@
             margin: 2.5rem 0;
         }
 
-        .stock-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .stock-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 0.5px solid #e5e5e5;
-            padding: 7px 12px;
-        }
-        .stock-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .stock-badge {
-            font-size: 10px;
-            font-weight: 600;
-            background: #0a0a0a;
-            color: #fff;
-            padding: 2px 7px;
-            letter-spacing: 0.07em;
-        }
-        .stock-link {
-            font-size: 11px;
-            color: #378ADD;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .stock-link:hover { color: #185FA5; }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #ccc;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 0 4px;
-            line-height: 1;
-        }
-        .delete-btn:hover { color: #e53935; }
-
-        .stock-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
         /* ── 토스트 메시지 ── */
         .toast {
             display: none;
@@ -255,35 +203,31 @@
     <p class="section-label">키워드 구독</p>
     <form th:action="@{/subscribe}" method="post">
         <div class="form-stack">
-            <input class="input-short" type="text" name="keyword"
-                   placeholder="키워드 (예: 삼성전자, 비트코인, 금리)" required/>
+            <input class="input-short" type="text" name="keyword" id="keyword-input"
+                   placeholder="키워드 (예: 삼성전자, 비트코인, 금리)" maxlength="30" required/>
             <input class="input-long" type="email" name="email"
                    placeholder="이메일 주소" required/>
         </div>
-        <button type="submit" class="submit-btn">구독하기</button>
-    </form>
-
-    <hr class="divider"/>
-
-    <p class="section-label">구독 중인 키워드</p>
-    <div class="stock-list" id="stock-list">
-        <div class="stock-row" th:each="stock : ${stocks}">
-            <div class="stock-left">
-                <span class="stock-badge" th:text="${stock.keyword}"></span>
-            </div>
-            <div class="stock-right">
-                <a class="stock-link"
-                   th:href="@{/analyze/{k}(k=${stock.keyword})}"
-                   onclick="showLoading()">AI 분석 보기 →</a>
-                <form th:action="@{/unsubscribe/{k}(k=${stock.keyword})}"
-                      method="post" style="display:inline;">
-                    <button class="delete-btn" type="submit"
-                            onclick="return confirm('구독을 취소할까요?')">✕</button>
-                </form>
-            </div>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+            <button type="submit" class="submit-btn">구독하기</button>
+            <button type="button" class="submit-btn" style="background:#fff; color:#0a0a0a; border:0.5px solid #ccc;"
+                    onclick="goAnalyze()">AI 분석 보기</button>
         </div>
-    </div>
+        <p style="font-size:11px; color:#aaa; margin-top:10px;">
+            구독하기를 누르면 입력한 이메일로 확인 메일이 발송돼요. 메일 속 링크를 눌러야 다이제스트가 시작되고,
+            구독 해지도 다이제스트 이메일에 담긴 링크로 언제든 할 수 있어요.
+        </p>
+    </form>
 </div>
+
+<script>
+    function goAnalyze() {
+        const kw = document.getElementById('keyword-input').value.trim();
+        if (!kw) { alert('키워드를 먼저 입력해주세요.'); return; }
+        showLoading();
+        window.location.href = '/analyze/' + encodeURIComponent(kw);
+    }
+</script>
 
 <div class="ticker-wrap">
     <div class="ticker-track" id="bottom-track"></div>
@@ -307,22 +251,16 @@
     }
 
     const TOP = [
-        "StockPulse — AI 기반 뉴스 감성 분석 서비스",
+        "StockPulse — 키워드 뉴스 구독 · 요약 이메일 서비스",
         "관심 키워드를 등록하면 매일 아침 뉴스 요약을 보내드려요",
         "삼성전자 · 비트코인 · 금리 · 환율 — 원하는 키워드 구독",
-        "AI가 뉴스 감성을 분석해 투자 판단을 도와드려요",
-        "오늘의 시장 코멘트: Fed 발언 앞두고 관망세 지속",
-        "글로벌 ETF 분석 리포트 — 주간 무료 발송 신청",
-        "환율·금리·원자재 — 매크로 지표 요약도 함께 받아보세요",
+        "네이버 뉴스 기반 키워드별 최신 기사 요약",
     ];
     const BOT = [
-        "실시간 공시 알림 — DART 연동 베타 서비스 오픈",
-        "이메일 말고 슬랙으로도 받아보세요 — Slack 연동 지원",
-        "미국·한국·일본 3개국 주요 종목 커버리지 확대 예정",
-        "AI 요약 리포트 예시 보기 — 지금 무료 체험 신청",
-        "주간 포트폴리오 성과 요약 — 매주 월요일 발송",
-        "종목 알림 커스텀 설정 — 원하는 조건만 골라 받기",
-        "네이버 뉴스 기반 실시간 키워드 분석 서비스",
+        "기사별 한 줄 요약 + 원문 링크로 빠르게 확인하세요",
+        "구독 확인 이메일의 링크를 눌러야 다이제스트가 시작돼요",
+        "구독 해지는 다이제스트 이메일 속 링크로 언제든 가능해요",
+        "네이버 뉴스 기반 실시간 키워드 검색 서비스",
     ];
 
     function build(items) {

@@ -1,18 +1,16 @@
 package com.stockpulse.stockpulse.scheduler;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stockpulse.stockpulse.domain.Stock;
 import com.stockpulse.stockpulse.repository.StockRepository;
-import com.stockpulse.stockpulse.service.AiService;
+import com.stockpulse.stockpulse.service.DigestService;
 import com.stockpulse.stockpulse.service.EmailService;
-import com.stockpulse.stockpulse.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -20,40 +18,43 @@ import java.util.Map;
 public class NewsScheduler {
 
     private final StockRepository stockRepository;
-    private final NewsService newsService;
-    private final AiService aiService;
+    private final DigestService digestService;
     private final EmailService emailService;
 
-    @Scheduled(cron = "0 0 7 * * *")
+    // 매일 오전 7시(한국 시간)에 발송. 배포 서버 시간대와 무관하게 항상 KST 기준으로 동작한다.
+    @Scheduled(cron = "0 0 7 * * *", zone = "Asia/Seoul")
     public void sendDailyNewsDigest() {
         log.info("뉴스 다이제스트 스케줄러 시작");
-        List<Stock> stocks = stockRepository.findAll();
+        // 이메일 확인(더블 옵트인)을 마친 구독만 발송 대상이다.
+        List<Stock> stocks = stockRepository.findAllByConfirmedTrue();
 
         for (Stock stock : stocks) {
             try {
-                List<Map<String, String>> newsList = newsService.fetchNews(stock.getKeyword());
-                if (newsList.isEmpty()) continue;
-
-                List<String> titles = newsService.extractTitles(newsList);
-                String aiResult = aiService.analyzeNews(stock.getKeyword(), titles);
-
-                String summary;
-                try {
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode node = mapper.readTree(aiResult);
-                    summary = node.has("summary") ?
-                            node.get("summary").asText() : "요약을 가져올 수 없어요.";
-                } catch (Exception e) {
-                    log.warn("AI 결과 파싱 실패: {}", e.getMessage());
-                    summary = "요약을 가져올 수 없어요.";
+                DigestService.Digest digest = digestService.getDigest(stock.getKeyword());
+                if (digest.isEmpty()) {
+                    log.info("새 기사 없음, 발송 생략: {}", stock.getKeyword());
+                    continue;
                 }
 
-                emailService.sendNewsDigest(
-                        stock.getEmail(),
-                        stock.getKeyword(),
-                        summary,
-                        "분석중"
-                );
+                String latestLink = digest.latestLink();
+                if (latestLink != null && latestLink.equals(stock.getLastSentArticleLink())) {
+                    log.info("이전과 동일한 최신 기사, 중복 발송 방지로 생략: {}", stock.getKeyword());
+                    continue;
+                }
+
+                try {
+                    emailService.sendNewsDigest(
+                            stock.getEmail(), stock.getKeyword(), digest.articles, stock.getToken());
+                    stock.setLastSendSuccess(true);
+                    stock.setLastSentArticleLink(latestLink);
+                } catch (Exception sendFailure) {
+                    stock.setLastSendSuccess(false);
+                    log.error("이메일 발송 실패, 다음 회차에 재시도됨 {}: {}",
+                            stock.getKeyword(), sendFailure.getMessage());
+                } finally {
+                    stock.setLastSentAt(LocalDateTime.now());
+                    stockRepository.save(stock);
+                }
 
                 // 키워드 사이 10초 대기 (Gemini 429 방지)
                 Thread.sleep(10000);

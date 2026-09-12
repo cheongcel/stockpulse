@@ -23,6 +23,9 @@ spring:
           starttls:
             enable: true
 
+app:
+  base-url: ${APP_BASE_URL:https://stockpulse.yoossi.dev}
+
 naver:
   api:
     client-id: ${NAVER_CLIENT_ID}

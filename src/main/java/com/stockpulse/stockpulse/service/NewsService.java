@@ -30,8 +30,8 @@ public class NewsService {
                     .uri(uriBuilder -> uriBuilder
                             .path("/v1/search/news.json")
                             .queryParam("query", keyword)
-                            .queryParam("display", 10)
-                            .queryParam("sort", "sim")
+                            .queryParam("display", 20)
+                            .queryParam("sort", "date")
                             .build())
                     .header("X-Naver-Client-Id", clientId)
                     .header("X-Naver-Client-Secret", clientSecret)
@@ -40,6 +40,7 @@ public class NewsService {
                     .block();
 
             List<Map<String, String>> newsList = new ArrayList<>();
+            java.util.Set<String> seenLinks = new java.util.HashSet<>();
             if (response != null && response.has("items")) {
                 for (JsonNode item : response.get("items")) {
                     String title = item.get("title").asText()
@@ -48,11 +49,24 @@ public class NewsService {
                             .replaceAll("&quot;", "\"")
                             .replaceAll("&#039;", "'");
                     String link = item.get("link").asText();
+                    if (!seenLinks.add(link)) continue; // 중복 링크 제거
+
+                    String description = item.has("description")
+                            ? item.get("description").asText()
+                                    .replaceAll("<[^>]*>", "")
+                                    .replaceAll("&amp;", "&")
+                                    .replaceAll("&quot;", "\"")
+                                    .replaceAll("&#039;", "'")
+                            : "";
+                    String pubDate = item.has("pubDate") ? item.get("pubDate").asText() : "";
 
                     Map<String, String> news = new HashMap<>();
                     news.put("title", title);
                     news.put("link", link);
+                    news.put("description", description);
+                    news.put("pubDate", pubDate);
                     newsList.add(news);
+                    if (newsList.size() >= 10) break; // 최신순 상위 10개만 사용
                 }
             }
             return newsList;
@@ -61,12 +75,5 @@ public class NewsService {
             log.error("네이버 뉴스 수집 실패: {}", e.getMessage());
             return List.of();
         }
-    }
-
-    // AI 분석용 제목만 추출
-    public List<String> extractTitles(List<Map<String, String>> newsList) {
-        return newsList.stream()
-                .map(news -> news.get("title"))
-                .toList();
     }
 }
